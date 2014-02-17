@@ -22,12 +22,11 @@
  */
 package be.fgov.kszbcss.rhq.websphere.config;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 import javax.management.JMException;
-
-import com.ibm.websphere.management.exception.ConnectorException;
 
 import be.fgov.kszbcss.rhq.websphere.config.types.CellCO;
 import be.fgov.kszbcss.rhq.websphere.config.types.NodeCO;
@@ -43,14 +42,14 @@ import be.fgov.kszbcss.rhq.websphere.config.types.ServerCO;
  * </ul>
  */
 public interface Config {
-    String getWebSphereVersion() throws JMException, ConnectorException, InterruptedException;
+    String getWebSphereVersion() throws JMException, IOException, InterruptedException;
     <T extends ConfigObject> Path<T> path(Class<T> type, String name);
     <T extends ConfigObject> Path<T> path(Class<T> type);
     Path<CellCO> cell();
     Path<NodeCO> node(String nodeName);
     Path<ServerCO> server(String nodeName, String serverName);
-    Path<Scope> allScopes(String nodeName, String serverName) throws JMException, ConnectorException, InterruptedException, ConfigQueryException;
-    String[] listResourceNames(String parent, int type, int depth) throws JMException, ConnectorException;
-    byte[] extract(String docURI) throws JMException, ConnectorException;
-    Map<String,List<Map<String,String>>> getApplicationInfo(final String appName) throws JMException, ConnectorException, InterruptedException;
+    Path<Scope> allScopes(String nodeName, String serverName) throws JMException, IOException, InterruptedException, ConfigQueryException;
+    String[] listResourceNames(String parent, int type, int depth) throws JMException, IOException;
+    byte[] extract(String docURI) throws JMException, IOException;
+    Map<String,List<Map<String,String>>> getApplicationInfo(final String appName) throws JMException, IOException, InterruptedException;
 }

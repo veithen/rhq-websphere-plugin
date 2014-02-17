@@ -29,11 +29,11 @@ import org.rhq.core.pluginapi.configuration.ConfigurationUpdateReport;
 import org.rhq.core.pluginapi.inventory.InvalidPluginConfigurationException;
 import org.rhq.core.pluginapi.measurement.MeasurementFacet;
 
+import com.github.veithen.visualwas.client.pmi.PmiModules;
+
 import be.fgov.kszbcss.rhq.websphere.component.j2ee.ApplicationComponent;
 import be.fgov.kszbcss.rhq.websphere.component.j2ee.DeploymentConfigurationFacetSupport;
 import be.fgov.kszbcss.rhq.websphere.component.j2ee.J2EEComponent;
-
-import com.ibm.websphere.pmi.PmiConstants;
 
 public abstract class EnterpriseBeanComponent extends J2EEComponent<EJBModuleComponent> implements MeasurementFacet, ConfigurationFacet {
     private DeploymentConfigurationFacetSupport configurationFacetSupport;
@@ -48,7 +48,7 @@ public abstract class EnterpriseBeanComponent extends J2EEComponent<EJBModuleCom
     
     @Override
     protected final String getPMIModule() {
-        return PmiConstants.BEAN_MODULE;
+        return PmiModules.BEAN;
     }
 
     public String getBeanName() {

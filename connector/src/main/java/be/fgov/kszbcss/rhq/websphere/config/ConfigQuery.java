@@ -22,13 +22,12 @@
  */
 package be.fgov.kszbcss.rhq.websphere.config;
 
+import java.io.IOException;
 import java.io.Serializable;
 
 import javax.management.JMException;
 
 import be.fgov.kszbcss.rhq.websphere.proxy.ConfigService;
-
-import com.ibm.websphere.management.exception.ConnectorException;
 
 /**
  * Encapsulates a query for WebSphere configuration data. Implementations of this interface actually
@@ -52,5 +51,5 @@ public interface ConfigQuery<T extends Serializable> extends Serializable {
     //       declaring JMException we would force the code to catch it and to wrap it
     //       in another exception, the stack trace of which would contain additional
     //       information about the location in the plug-in code where the exception occurred.
-    T execute(Config config) throws JMException, ConnectorException, InterruptedException, ConfigQueryException;
+    T execute(Config config) throws JMException, IOException, InterruptedException, ConfigQueryException;
 }

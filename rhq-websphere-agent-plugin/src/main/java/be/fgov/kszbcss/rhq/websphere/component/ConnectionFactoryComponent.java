@@ -35,7 +35,6 @@ import org.rhq.core.pluginapi.inventory.InvalidPluginConfigurationException;
 import org.rhq.core.pluginapi.measurement.MeasurementFacet;
 
 import com.ibm.websphere.management.exception.ConnectorException;
-import com.ibm.websphere.pmi.stat.WSRangeStatistic;
 
 import be.fgov.kszbcss.rhq.websphere.component.server.WebSphereServerComponent;
 import be.fgov.kszbcss.rhq.websphere.config.ConfigData;
@@ -44,6 +43,8 @@ import be.fgov.kszbcss.rhq.websphere.mbean.MBeanClient;
 import be.fgov.kszbcss.rhq.websphere.support.measurement.MeasurementFacetSupport;
 import be.fgov.kszbcss.rhq.websphere.support.measurement.PMIMeasurementHandler;
 import be.fgov.kszbcss.rhq.websphere.support.measurement.PMIModuleSelector;
+
+import com.github.veithen.visualwas.client.pmi.RangeStatistic;
 
 public abstract class ConnectionFactoryComponent extends WebSphereServiceComponent<WebSphereServerComponent> implements MeasurementFacet {
     private static final Logger log = LoggerFactory.getLogger(ConnectionFactoryComponent.class);
@@ -75,7 +76,7 @@ public abstract class ConnectionFactoryComponent extends WebSphereServiceCompone
         };
         measurementFacetSupport.addHandler("stats", new PMIMeasurementHandler(moduleSelector) {
             @Override
-            protected double getValue(String name, WSRangeStatistic statistic) {
+            protected double getValue(String name, RangeStatistic statistic) {
                 if (name.equals("PercentMaxed") || name.equals("PercentUsed")) {
                     return ((double)statistic.getCurrent())/100;
                 } else {

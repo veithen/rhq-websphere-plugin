@@ -22,14 +22,13 @@
  */
 package be.fgov.kszbcss.rhq.websphere.config;
 
+import java.io.IOException;
 import java.util.Collection;
 
 import javax.management.JMException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.ibm.websphere.management.exception.ConnectorException;
 
 final class RootPath extends Path<ConfigObject> {
     private static final Logger log = LoggerFactory.getLogger(RootPath.class);
@@ -46,7 +45,7 @@ final class RootPath extends Path<ConfigObject> {
     }
 
     @Override
-    <S extends ConfigObject> Collection<S> resolveRelative(String relativePath, Class<S> type) throws JMException, ConnectorException, InterruptedException {
+    <S extends ConfigObject> Collection<S> resolveRelative(String relativePath, Class<S> type) throws JMException, IOException, InterruptedException {
         if (relativePath == null) {
             throw new IllegalArgumentException("relativePath can't be null");
         }

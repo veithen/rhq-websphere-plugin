@@ -37,16 +37,16 @@ import org.rhq.core.domain.measurement.MeasurementDataNumeric;
 import org.rhq.core.domain.measurement.MeasurementReport;
 import org.rhq.core.domain.measurement.MeasurementScheduleRequest;
 
-import be.fgov.kszbcss.rhq.websphere.process.WebSphereServer;
+import com.github.veithen.visualwas.client.pmi.AverageStatistic;
+import com.github.veithen.visualwas.client.pmi.CountStatistic;
+import com.github.veithen.visualwas.client.pmi.PmiDataInfo;
+import com.github.veithen.visualwas.client.pmi.PmiModuleConfig;
+import com.github.veithen.visualwas.client.pmi.RangeStatistic;
+import com.github.veithen.visualwas.client.pmi.StatDescriptor;
+import com.github.veithen.visualwas.client.pmi.Statistic;
+import com.github.veithen.visualwas.client.pmi.Stats;
 
-import com.ibm.websphere.pmi.PmiDataInfo;
-import com.ibm.websphere.pmi.PmiModuleConfig;
-import com.ibm.websphere.pmi.stat.StatDescriptor;
-import com.ibm.websphere.pmi.stat.WSAverageStatistic;
-import com.ibm.websphere.pmi.stat.WSCountStatistic;
-import com.ibm.websphere.pmi.stat.WSRangeStatistic;
-import com.ibm.websphere.pmi.stat.WSStatistic;
-import com.ibm.websphere.pmi.stat.WSStats;
+import be.fgov.kszbcss.rhq.websphere.process.WebSphereServer;
 
 public class PMIMeasurementHandler implements MeasurementGroupHandler {
     private static long STAT_ENABLE_ATTEMPT_INTERVAL = 12*3600*1000;
@@ -55,7 +55,7 @@ public class PMIMeasurementHandler implements MeasurementGroupHandler {
     
     private final PMIModuleSelector moduleSelector;
     private StatDescriptor descriptor;
-    private final Map<String,WSAverageStatistic> lastStats = new HashMap<String,WSAverageStatistic>();
+    private final Map<String,AverageStatistic> lastStats = new HashMap<String,AverageStatistic>();
     
     /**
      * Records failed attempts to enable a statistic. The key is the dataId of the statistic, and
@@ -94,7 +94,7 @@ public class PMIMeasurementHandler implements MeasurementGroupHandler {
         purgeFailedAttemptsToEnableStat();
         
         StatDescriptor descriptor;
-        WSStats stats;
+        Stats stats;
         boolean isFreshDescriptor;
         synchronized (this) {
             descriptor = this.descriptor;
@@ -183,7 +183,7 @@ public class PMIMeasurementHandler implements MeasurementGroupHandler {
             // For some WSStats objects, the statistic names don't match the names used by PMI.
             // Therefore we translate all names to data IDs. This also makes it easier to
             // automatically enable the statistics if necessary.
-            WSStatistic statistic = stats.getStatistic(dataId);
+            Statistic statistic = stats.getStatistic(dataId);
             if (statistic == null) {
                 if (failedAttemptsToEnableStat.containsKey(dataId)) {
                     if (log.isDebugEnabled()) {
@@ -203,13 +203,13 @@ public class PMIMeasurementHandler implements MeasurementGroupHandler {
                 log.debug("Loaded Statistic with name " + statisticName + " (ID " + dataId + ") and type " + statistic.getClass().getName());
             }
             double value;
-            if (statistic instanceof WSCountStatistic) {
-                value = ((WSCountStatistic)statistic).getCount();
-            } else if (statistic instanceof WSRangeStatistic) {
-                value = getValue(statisticName, (WSRangeStatistic)statistic);
-            } else if (statistic instanceof WSAverageStatistic) {
-                WSAverageStatistic currentStatistic = (WSAverageStatistic)statistic;
-                WSAverageStatistic prevStatistic = lastStats.get(statisticName);
+            if (statistic instanceof CountStatistic) {
+                value = ((CountStatistic)statistic).getCount();
+            } else if (statistic instanceof RangeStatistic) {
+                value = getValue(statisticName, (RangeStatistic)statistic);
+            } else if (statistic instanceof AverageStatistic) {
+                AverageStatistic currentStatistic = (AverageStatistic)statistic;
+                AverageStatistic prevStatistic = lastStats.get(statisticName);
                 lastStats.put(statisticName, currentStatistic);
                 if (log.isDebugEnabled()) {
                     if (prevStatistic == null) {
@@ -257,11 +257,11 @@ public class PMIMeasurementHandler implements MeasurementGroupHandler {
         }
     }
     
-    private static String dumpStatistic(WSAverageStatistic statistic) {
+    private static String dumpStatistic(AverageStatistic statistic) {
         return "total=" + statistic.getTotal() + ", min=" + statistic.getMin() + ", max=" + statistic.getMax() + ", startTime=" + statistic.getStartTime() + ", count=" + statistic.getCount();
     }
     
-    protected double getValue(String name, WSRangeStatistic statistic) {
+    protected double getValue(String name, RangeStatistic statistic) {
         return statistic.getCurrent();
     }
 

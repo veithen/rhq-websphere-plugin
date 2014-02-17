@@ -22,11 +22,10 @@
  */
 package be.fgov.kszbcss.rhq.websphere.config;
 
+import java.io.IOException;
 import java.io.Serializable;
 
 import javax.management.JMException;
-
-import com.ibm.websphere.management.exception.ConnectorException;
 
 public interface ConfigQueryExecutor {
     /**
@@ -40,7 +39,7 @@ public interface ConfigQueryExecutor {
      * @throws InterruptedException
      * @throws ConfigQueryException 
      */
-    <T extends Serializable> T query(ConfigQuery<T> query) throws JMException, ConnectorException, InterruptedException, ConfigQueryException;
+    <T extends Serializable> T query(ConfigQuery<T> query) throws JMException, IOException, InterruptedException, ConfigQueryException;
     
     void destroy();
 }

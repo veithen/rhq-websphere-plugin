@@ -23,6 +23,7 @@
 package be.fgov.kszbcss.rhq.websphere.config;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
@@ -39,11 +40,10 @@ import javax.management.ObjectName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.veithen.visualwas.client.repository.ConfigEpoch;
+
 import be.fgov.kszbcss.rhq.websphere.config.cache.ConfigQueryCache;
 import be.fgov.kszbcss.rhq.websphere.process.WebSphereServer;
-
-import com.ibm.websphere.management.exception.ConnectorException;
-import com.ibm.websphere.management.repository.ConfigEpoch;
 
 public class ConfigQueryServiceImpl implements ConfigQueryService, Runnable, ConfigQueryServiceImplMBean {
     private static final Logger log = LoggerFactory.getLogger(ConfigQueryServiceImpl.class);
@@ -139,7 +139,7 @@ public class ConfigQueryServiceImpl implements ConfigQueryService, Runnable, Con
         return config;
     }
 
-    public <T extends Serializable> T query(ConfigQuery<T> query) throws JMException, ConnectorException, InterruptedException, ConfigQueryException {
+    public <T extends Serializable> T query(ConfigQuery<T> query) throws JMException, IOException, InterruptedException, ConfigQueryException {
         // TODO: should we check first if the connection to the deployment manager is available?
         if (log.isDebugEnabled()) {
             log.debug("Executing query: " + query);

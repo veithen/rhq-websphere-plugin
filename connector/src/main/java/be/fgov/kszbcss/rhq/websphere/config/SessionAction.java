@@ -22,13 +22,14 @@
  */
 package be.fgov.kszbcss.rhq.websphere.config;
 
+import java.io.IOException;
+
 import javax.management.JMException;
 
-import be.fgov.kszbcss.rhq.websphere.proxy.AppManagement;
-import be.fgov.kszbcss.rhq.websphere.proxy.ConfigService;
+import com.github.veithen.visualwas.client.config.ConfigService;
+import com.github.veithen.visualwas.connector.mapped.Session;
 
-import com.ibm.websphere.management.Session;
-import com.ibm.websphere.management.exception.ConnectorException;
+import be.fgov.kszbcss.rhq.websphere.proxy.AppManagement;
 
 /**
  * An action that is executed in the context of a {@link Session}. This applies to methods of the
@@ -40,5 +41,5 @@ import com.ibm.websphere.management.exception.ConnectorException;
  *            the result type for the action
  */
 interface SessionAction<T> {
-    T execute(ConfigService configService, AppManagement appManagement, Session session) throws JMException, ConnectorException;
+    T execute(ConfigService configService, AppManagement appManagement, Session session) throws JMException, IOException;
 }

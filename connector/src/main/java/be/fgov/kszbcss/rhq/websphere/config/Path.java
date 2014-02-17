@@ -22,6 +22,7 @@
  */
 package be.fgov.kszbcss.rhq.websphere.config;
 
+import java.io.IOException;
 import java.util.Collection;
 
 import javax.management.JMException;
@@ -29,13 +30,11 @@ import javax.management.JMException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ibm.websphere.management.exception.ConnectorException;
-
 public abstract class Path<T extends ConfigObject> {
     private static final Logger log = LoggerFactory.getLogger(Path.class);
     
     abstract Class<T> getType();
-    abstract <S extends ConfigObject> Collection<S> resolveRelative(String relativePath, Class<S> type) throws JMException, ConnectorException, InterruptedException;
+    abstract <S extends ConfigObject> Collection<S> resolveRelative(String relativePath, Class<S> type) throws JMException, IOException, InterruptedException;
     
     public final <S extends ConfigObject> Path<S> path(Class<S> type, String name) {
         if (name == null) {
@@ -58,10 +57,10 @@ public abstract class Path<T extends ConfigObject> {
      * @return the collection of configuration objects found for this path; if no configuration
      *         objects are found, an empty collection is returned
      * @throws JMException
-     * @throws ConnectorException
+     * @throws IOException
      * @throws InterruptedException
      */
-    public Collection<T> resolve(boolean detach) throws JMException, ConnectorException, InterruptedException {
+    public Collection<T> resolve(boolean detach) throws JMException, IOException, InterruptedException {
         Collection<T> configObjects = resolveRelative(null, getType());
         if (log.isDebugEnabled()) {
             if (configObjects.isEmpty()) {
@@ -92,14 +91,14 @@ public abstract class Path<T extends ConfigObject> {
      * 
      * @return the configuration object; never <code>null</code>
      * @throws JMException
-     * @throws ConnectorException
+     * @throws IOException
      * @throws InterruptedException
      * @throws ConfigObjectNotFoundException
      *             if no configuration object for this path was found
      * @throws MultipleConfigObjectsFoundException
      *             if multiple configuration objects for this path exist
      */
-    public T resolveSingle(boolean detach) throws JMException, ConnectorException, InterruptedException, ConfigQueryException {
+    public T resolveSingle(boolean detach) throws JMException, IOException, InterruptedException, ConfigQueryException {
         Collection<T> configObjects = resolve(false);
         if (configObjects.size() == 1) {
             T configObject = configObjects.iterator().next();
@@ -114,7 +113,7 @@ public abstract class Path<T extends ConfigObject> {
         }
     }
 
-    public T resolveAtMostOne(boolean detach) throws JMException, ConnectorException, InterruptedException, ConfigQueryException {
+    public T resolveAtMostOne(boolean detach) throws JMException, IOException, InterruptedException, ConfigQueryException {
         Collection<T> configObjects = resolve(false);
         if (configObjects.size() == 1) {
             T configObject = configObjects.iterator().next();

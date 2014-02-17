@@ -25,19 +25,19 @@ package be.fgov.kszbcss.rhq.websphere.component.j2ee.web;
 import org.rhq.core.domain.measurement.AvailabilityType;
 import org.rhq.core.pluginapi.measurement.MeasurementFacet;
 
-import be.fgov.kszbcss.rhq.websphere.component.j2ee.J2EEComponent;
+import com.github.veithen.visualwas.client.pmi.PmiModules;
 
-import com.ibm.websphere.pmi.PmiConstants;
+import be.fgov.kszbcss.rhq.websphere.component.j2ee.J2EEComponent;
 
 public class ServletComponent extends J2EEComponent<WebModuleComponent> implements MeasurementFacet {
     @Override
     protected String getPMIModule() {
-        return PmiConstants.WEBAPP_MODULE;
+        return PmiModules.WEB_APP;
     }
 
     @Override
     protected String getPMISubmodule() {
-        return PmiConstants.SERVLET_SUBMODULE;
+        return PmiModules.WEB_APP_SERVLETS;
     }
 
     @Override

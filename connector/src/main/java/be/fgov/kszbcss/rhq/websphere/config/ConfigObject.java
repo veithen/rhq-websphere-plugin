@@ -22,11 +22,10 @@
  */
 package be.fgov.kszbcss.rhq.websphere.config;
 
+import java.io.IOException;
 import java.io.Serializable;
 
 import javax.management.JMException;
-
-import com.ibm.websphere.management.exception.ConnectorException;
 
 import be.fgov.kszbcss.rhq.websphere.proxy.ConfigService;
 
@@ -51,5 +50,5 @@ public interface ConfigObject extends Serializable {
      * @throws ConnectorException
      * @throws JMException
      */
-    void detach() throws JMException, ConnectorException, InterruptedException;
+    void detach() throws JMException, IOException, InterruptedException;
 }

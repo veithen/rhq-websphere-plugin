@@ -22,13 +22,12 @@
  */
 package be.fgov.kszbcss.rhq.websphere.config;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import javax.management.JMException;
-
-import com.ibm.websphere.management.exception.ConnectorException;
 
 final class PathGroup<T extends ConfigObject> extends Path<T> {
     private final Class<T> type;
@@ -45,7 +44,7 @@ final class PathGroup<T extends ConfigObject> extends Path<T> {
     }
 
     @Override
-    <S extends ConfigObject> Collection<S> resolveRelative(String relativePath, Class<S> type) throws JMException, ConnectorException, InterruptedException {
+    <S extends ConfigObject> Collection<S> resolveRelative(String relativePath, Class<S> type) throws JMException, IOException, InterruptedException {
         List<S> result = new ArrayList<S>();
         for (Path<? extends T> path : paths) {
             result.addAll(path.resolveRelative(relativePath, type));

@@ -23,6 +23,7 @@
 package be.fgov.kszbcss.rhq.websphere.config;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -98,7 +99,7 @@ public class ConfigQueryServiceFactory {
         return new ConfigQueryServiceImpl(name, new File(cacheDirectory, name), server, cell);
     }
     
-    public ConfigQueryExecutor getConfigQueryExecutor(WebSphereServer server) throws ConnectorException {
+    public ConfigQueryExecutor getConfigQueryExecutor(WebSphereServer server) throws IOException {
         return new CellConfiguration(server, server.getCell());
     }
     

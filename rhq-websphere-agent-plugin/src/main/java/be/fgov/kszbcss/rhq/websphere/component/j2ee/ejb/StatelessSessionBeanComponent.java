@@ -26,10 +26,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.rhq.core.domain.measurement.AvailabilityType;
 
+import com.github.veithen.visualwas.client.pmi.PmiModules;
+
 import be.fgov.kszbcss.rhq.websphere.mbean.MBeanClientProxy;
 import be.fgov.kszbcss.rhq.websphere.proxy.EJBMonitor;
-
-import com.ibm.websphere.pmi.PmiConstants;
 
 public class StatelessSessionBeanComponent extends EnterpriseBeanComponent {
     private static final Logger log = LoggerFactory.getLogger(StatelessSessionBeanComponent.class);
@@ -41,7 +41,7 @@ public class StatelessSessionBeanComponent extends EnterpriseBeanComponent {
 
     @Override
     protected String getPMISubmodule() {
-        return PmiConstants.EJB_STATELESS;
+        return PmiModules.EJB_STATELESS;
     }
 
     @Override

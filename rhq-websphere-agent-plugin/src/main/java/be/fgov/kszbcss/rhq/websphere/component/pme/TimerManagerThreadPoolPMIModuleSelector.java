@@ -29,8 +29,8 @@ import be.fgov.kszbcss.rhq.websphere.config.ConfigQueryException;
 import be.fgov.kszbcss.rhq.websphere.config.types.TimerManagerInfoCO;
 import be.fgov.kszbcss.rhq.websphere.support.measurement.PMIModuleSelector;
 
+import com.github.veithen.visualwas.client.pmi.PmiModules;
 import com.ibm.websphere.management.exception.ConnectorException;
-import com.ibm.websphere.pmi.PmiConstants;
 
 public class TimerManagerThreadPoolPMIModuleSelector implements PMIModuleSelector {
     private final String jndiName;
@@ -52,6 +52,6 @@ public class TimerManagerThreadPoolPMIModuleSelector implements PMIModuleSelecto
         if (name == null) {
             throw new JMException("No timer manager found for JNDI name " + jndiName);
         }
-        return new String[] { PmiConstants.THREADPOOL_MODULE, name + ".Alarm Pool" };
+        return new String[] { PmiModules.THREAD_POOL, name + ".Alarm Pool" };
     }
 }

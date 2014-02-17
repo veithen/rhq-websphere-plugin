@@ -22,6 +22,7 @@
  */
 package be.fgov.kszbcss.rhq.websphere.mbean;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.HashMap;
@@ -38,8 +39,7 @@ import org.slf4j.LoggerFactory;
 
 import be.fgov.kszbcss.rhq.websphere.process.WebSphereServer;
 
-import com.ibm.websphere.management.AdminClient;
-import com.ibm.websphere.management.exception.ConnectorException;
+import com.github.veithen.visualwas.connector.Connector;
 
 /**
  * An MBean identified by an object name pattern. An instance of this class lazily resolves
@@ -50,7 +50,7 @@ public class MBeanClient {
     private static final Logger log = LoggerFactory.getLogger(MBeanClient.class);
     
     private interface Action<T> {
-        public T execute(AdminClient adminClient, ObjectName objectName) throws JMException, ConnectorException;
+        public T execute(Connector connector, ObjectName objectName) throws JMException, IOException;
     }
     
     private final WebSphereServer server;
@@ -67,7 +67,7 @@ public class MBeanClient {
         return locator;
     }
 
-    public ObjectName getObjectName(boolean refresh) throws JMException, ConnectorException, InterruptedException {
+    public ObjectName getObjectName(boolean refresh) throws JMException, IOException, InterruptedException {
         if (refresh) {
             ObjectName objectName = internalGetObjectName();
             synchronized (this) {
@@ -84,7 +84,7 @@ public class MBeanClient {
         }
     }
     
-    private ObjectName internalGetObjectName() throws JMException, ConnectorException, InterruptedException {
+    private ObjectName internalGetObjectName() throws JMException, IOException, InterruptedException {
         if (log.isDebugEnabled()) {
             log.debug("Attempting to resolve " + locator);
         }
@@ -109,9 +109,9 @@ public class MBeanClient {
                     log.debug("Creating dynamic proxy for MBean " + locator);
                 }
                 for (Method method : iface.getMethods()) {
-                    if (!throwsException(method, JMException.class) || !throwsException(method, ConnectorException.class)) {
+                    if (!throwsException(method, JMException.class) || !throwsException(method, IOException.class)) {
                         throw new IllegalArgumentException(iface.getName() + " is not a valid proxy class: method " + method.getName()
-                                + " must declare JMException and ConnectorException");
+                                + " must declare JMException and IOException");
                     }
                 }
                 proxy = Proxy.newProxyInstance(MBeanClient.class.getClassLoader(), new Class<?>[] { iface, MBeanClientProxy.class },
@@ -131,15 +131,15 @@ public class MBeanClient {
         return false;
     }
     
-    private <T> T execute(Action<T> action) throws JMException, ConnectorException, InterruptedException {
-        AdminClient adminClient = server.getAdminClient();
+    private <T> T execute(Action<T> action) throws JMException, IOException, InterruptedException {
+        Connector connector = server.getAdminClient();
         ObjectName cachedObjectName;
         synchronized (this) {
             cachedObjectName = this.cachedObjectName;
         }
         if (cachedObjectName != null) {
             try {
-                return action.execute(adminClient, cachedObjectName);
+                return action.execute(connector, cachedObjectName);
             } catch (InstanceNotFoundException ex) {
                 // Continue; we will attempt to re-resolve the object name
             }
@@ -151,37 +151,37 @@ public class MBeanClient {
         if (log.isDebugEnabled()) {
             log.debug("Found MBean instance: " + cachedObjectName);
         }
-        return action.execute(adminClient, cachedObjectName);
+        return action.execute(connector, cachedObjectName);
     }
     
-    public Object invoke(final String operationName, final Object[] params, final String[] signature) throws JMException, ConnectorException, InterruptedException {
+    public Object invoke(final String operationName, final Object[] params, final String[] signature) throws JMException, IOException, InterruptedException {
         return execute(new Action<Object>() {
-            public Object execute(AdminClient adminClient, ObjectName objectName) throws JMException, ConnectorException {
-                return adminClient.invoke(objectName, operationName, params, signature);
+            public Object execute(Connector connector, ObjectName objectName) throws JMException, IOException {
+                return connector.invoke(objectName, operationName, params, signature);
             }
         });
     }
     
-    public Object getAttribute(final String attribute) throws JMException, ConnectorException, InterruptedException {
+    public Object getAttribute(final String attribute) throws JMException, IOException, InterruptedException {
         return execute(new Action<Object>() {
-            public Object execute(AdminClient adminClient, ObjectName objectName) throws JMException, ConnectorException {
-                return adminClient.getAttribute(objectName, attribute);
+            public Object execute(Connector connector, ObjectName objectName) throws JMException, IOException {
+                return connector.getAttribute(objectName, attribute);
             }
         });
     }
     
-    public AttributeList getAttributes(final String[] attributes) throws JMException, ConnectorException, InterruptedException {
+    public AttributeList getAttributes(final String[] attributes) throws JMException, IOException, InterruptedException {
         return execute(new Action<AttributeList>() {
-            public AttributeList execute(AdminClient adminClient, ObjectName objectName) throws JMException, ConnectorException {
-                return adminClient.getAttributes(objectName, attributes);
+            public AttributeList execute(Connector connector, ObjectName objectName) throws JMException, IOException {
+                return connector.getAttributes(objectName, attributes);
             }
         });
     }
     
-    public AttributeList setAttributes(final AttributeList attributes) throws JMException, ConnectorException, InterruptedException {
+    public AttributeList setAttributes(final AttributeList attributes) throws JMException, IOException, InterruptedException {
         return execute(new Action<AttributeList>() {
-            public AttributeList execute(AdminClient adminClient, ObjectName objectName) throws JMException, ConnectorException {
-                return adminClient.setAttributes(objectName, attributes);
+            public AttributeList execute(Connector connector, ObjectName objectName) throws JMException, IOException {
+                return connector.setAttributes(objectName, attributes);
             }
         });
     }
@@ -195,16 +195,16 @@ public class MBeanClient {
      * @throws ConnectorException
      * @throws InterruptedException 
      */
-    public boolean isRegistered() throws JMException, ConnectorException, InterruptedException {
+    public boolean isRegistered() throws JMException, IOException, InterruptedException {
         try {
             execute(new Action<Void>() {
-                public Void execute(AdminClient adminClient, ObjectName objectName) throws JMException, ConnectorException {
+                public Void execute(Connector connector, ObjectName objectName) throws JMException, IOException {
                     // We need to take into account the case where the MBean has been re-registered
                     // with an object name that is different than the last known object name,
                     // but that still matches the MBeanLocator. To achieve this, we throw an
                     // InstanceNotFoundException if the MBean is not registered. The execute method
                     // will then attempt to re-resolve the object name.
-                    if (!adminClient.isRegistered(objectName)) {
+                    if (!connector.isRegistered(objectName)) {
                         throw new InstanceNotFoundException();
                     }
                     return null;

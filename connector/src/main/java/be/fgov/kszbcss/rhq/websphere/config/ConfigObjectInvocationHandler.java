@@ -39,12 +39,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import be.fgov.kszbcss.rhq.websphere.proxy.AppManagement;
-import be.fgov.kszbcss.rhq.websphere.proxy.ConfigService;
 
-import com.ibm.websphere.management.Session;
+import com.github.veithen.visualwas.client.config.ConfigService;
+import com.github.veithen.visualwas.connector.mapped.Session;
 import com.ibm.websphere.management.configservice.ConfigServiceHelper;
 import com.ibm.websphere.management.configservice.SystemAttributes;
-import com.ibm.websphere.management.exception.ConnectorException;
 
 /**
  * Invocation handler for {@link ConfigObject} proxies. This class is designed to be thread safe
@@ -76,7 +75,7 @@ final class ConfigObjectInvocationHandler implements InvocationHandler, ConfigOb
         return objectName.getKeyProperty(SystemAttributes._WEBSPHERE_CONFIG_DATA_TYPE);
     }
     
-    public synchronized void detach() throws JMException, ConnectorException, InterruptedException {
+    public synchronized void detach() throws JMException, IOException, InterruptedException {
         for (ConfigObjectAttributeDesc desc : type.getAttributeDescriptors()) {
             Object value = getAttributeValue(desc);
             if (value != null && desc.isReference()) {
@@ -102,14 +101,14 @@ final class ConfigObjectInvocationHandler implements InvocationHandler, ConfigOb
         }
     }
     
-    private synchronized Object getAttributeValue(ConfigObjectAttributeDesc desc) throws JMException, ConnectorException, InterruptedException {
+    private synchronized Object getAttributeValue(ConfigObjectAttributeDesc desc) throws JMException, IOException, InterruptedException {
         if (attributes == null) {
             if (log.isDebugEnabled()) {
                 log.debug("Loading attributes for configuration object " + objectName + " ...");
             }
             final String[] attributeNames = type.getAttributeNames();
             attributes = config.execute(new SessionAction<AttributeList>() {
-                public AttributeList execute(ConfigService configService, AppManagement appManagement, Session session) throws JMException, ConnectorException {
+                public AttributeList execute(ConfigService configService, AppManagement appManagement, Session session) throws JMException, IOException {
                     return configService.getAttributes(session, objectName, attributeNames, false);
                 }
             });
@@ -172,7 +171,7 @@ final class ConfigObjectInvocationHandler implements InvocationHandler, ConfigOb
                 buffer.append(getAttributeValue(desc));
             } catch (JMException ex) {
                 buffer.append("#ERROR#");
-            } catch (ConnectorException ex) {
+            } catch (IOException ex) {
                 buffer.append("#ERROR#");
             } catch (InterruptedException ex) {
                 Thread.interrupted();

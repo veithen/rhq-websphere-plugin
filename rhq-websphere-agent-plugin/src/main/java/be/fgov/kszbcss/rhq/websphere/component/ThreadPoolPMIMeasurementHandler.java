@@ -22,7 +22,7 @@
  */
 package be.fgov.kszbcss.rhq.websphere.component;
 
-import com.ibm.websphere.pmi.stat.WSRangeStatistic;
+import com.github.veithen.visualwas.client.pmi.RangeStatistic;
 
 import be.fgov.kszbcss.rhq.websphere.support.measurement.PMIMeasurementHandler;
 import be.fgov.kszbcss.rhq.websphere.support.measurement.PMIModuleSelector;
@@ -37,7 +37,7 @@ public class ThreadPoolPMIMeasurementHandler extends PMIMeasurementHandler {
     }
 
     @Override
-    protected double getValue(String name, WSRangeStatistic statistic) {
+    protected double getValue(String name, RangeStatistic statistic) {
         if (name.equals("PercentMaxed")) {
             return ((double)statistic.getCurrent())/100;
         } else {

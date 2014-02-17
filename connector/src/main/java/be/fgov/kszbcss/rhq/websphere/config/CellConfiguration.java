@@ -44,6 +44,11 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.veithen.visualwas.client.config.ConfigService;
+import com.github.veithen.visualwas.client.repository.ConfigEpoch;
+import com.github.veithen.visualwas.client.repository.ConfigRepository;
+import com.github.veithen.visualwas.connector.mapped.Session;
+
 import be.fgov.kszbcss.rhq.websphere.config.types.CellCO;
 import be.fgov.kszbcss.rhq.websphere.config.types.NodeCO;
 import be.fgov.kszbcss.rhq.websphere.config.types.ServerCO;
@@ -51,14 +56,6 @@ import be.fgov.kszbcss.rhq.websphere.config.types.ServerClusterCO;
 import be.fgov.kszbcss.rhq.websphere.mbean.MBeanClientProxy;
 import be.fgov.kszbcss.rhq.websphere.process.WebSphereServer;
 import be.fgov.kszbcss.rhq.websphere.proxy.AppManagement;
-import be.fgov.kszbcss.rhq.websphere.proxy.ConfigRepository;
-import be.fgov.kszbcss.rhq.websphere.proxy.ConfigService;
-
-import com.ibm.websphere.management.Session;
-import com.ibm.websphere.management.application.client.AppDeploymentTask;
-import com.ibm.websphere.management.configservice.SystemAttributes;
-import com.ibm.websphere.management.exception.ConnectorException;
-import com.ibm.websphere.management.repository.ConfigEpoch;
 
 public class CellConfiguration implements Config, ConfigQueryExecutor {
     static class ResolverCacheEntry {
@@ -108,7 +105,7 @@ public class CellConfiguration implements Config, ConfigQueryExecutor {
         return cell;
     }
 
-    ConfigEpoch getRepositoryEpoch() throws JMException, ConnectorException {
+    ConfigEpoch getRepositoryEpoch() throws JMException, IOException {
         return configRepository.getRepositoryEpoch();
     }
 
@@ -118,14 +115,14 @@ public class CellConfiguration implements Config, ConfigQueryExecutor {
      * 
      * @return
      * @throws JMException
-     * @throws ConnectorException
+     * @throws IOException
      * @throws InterruptedException 
      */
-    public String getWebSphereVersion() throws JMException, ConnectorException, InterruptedException {
+    public String getWebSphereVersion() throws JMException, IOException, InterruptedException {
         return ((MBeanClientProxy)configService).getMBeanClient().getObjectName(false).getKeyProperty("version");
     }
     
-    <T> T execute(SessionAction<T> action) throws JMException, ConnectorException, InterruptedException {
+    <T> T execute(SessionAction<T> action) throws JMException, IOException, InterruptedException {
         // Note: a read lock can't be upgraded to a write lock, so we need to acquire a write
         // lock first.
         Lock readLock = sessionLock.readLock();
@@ -178,7 +175,7 @@ public class CellConfiguration implements Config, ConfigQueryExecutor {
         return node(nodeName).path(ServerCO.class, serverName);
     }
     
-    public Path<Scope> allScopes(String nodeName, String serverName) throws JMException, ConnectorException, InterruptedException, ConfigQueryException {
+    public Path<Scope> allScopes(String nodeName, String serverName) throws JMException, IOException, InterruptedException, ConfigQueryException {
         Path<CellCO> cell = cell();
         Path<NodeCO> node = cell.path(NodeCO.class, nodeName);
         Path<ServerCO> server = node.path(ServerCO.class, serverName);
@@ -195,7 +192,7 @@ public class CellConfiguration implements Config, ConfigQueryExecutor {
         return new PathGroup<Scope>(Scope.class, paths);
     }
     
-    <T extends ConfigObject> Collection<T> resolve(final String containmentPath, Class<T> type) throws JMException, ConnectorException, InterruptedException {
+    <T extends ConfigObject> Collection<T> resolve(final String containmentPath, Class<T> type) throws JMException, IOException, InterruptedException {
         ResolverCacheEntry cacheEntry;
         synchronized (resolverCache) {
             cacheEntry = resolverCache.get(containmentPath);
@@ -216,7 +213,7 @@ public class CellConfiguration implements Config, ConfigQueryExecutor {
                     log.debug("Resolver cache miss for containment path " + containmentPath);
                 }
                 ObjectName[] objectNames = execute(new SessionAction<ObjectName[]>() {
-                    public ObjectName[] execute(ConfigService configService, AppManagement appManagement, Session session) throws JMException, ConnectorException {
+                    public ObjectName[] execute(ConfigService configService, AppManagement appManagement, Session session) throws JMException, IOException {
                         return configService.resolve(session, containmentPath);
                     }
                 });
@@ -257,11 +254,11 @@ public class CellConfiguration implements Config, ConfigQueryExecutor {
         }
     }
     
-    public String[] listResourceNames(String parent, int type, int depth) throws JMException, ConnectorException {
+    public String[] listResourceNames(String parent, int type, int depth) throws JMException, IOException {
         return configRepository.listResourceNames(parent, type, depth);
     }
 
-    public byte[] extract(String docURI) throws JMException, ConnectorException {
+    public byte[] extract(String docURI) throws JMException, IOException {
         try {
             InputStream in = configRepository.extract(docURI).getSource();
             try {
@@ -274,7 +271,7 @@ public class CellConfiguration implements Config, ConfigQueryExecutor {
         }
     }
     
-    public Map<String,List<Map<String,String>>> getApplicationInfo(final String appName) throws JMException, ConnectorException, InterruptedException {
+    public Map<String,List<Map<String,String>>> getApplicationInfo(final String appName) throws JMException, IOException, InterruptedException {
         Map<String,List<Map<String,String>>> result = execute(new SessionAction<Map<String,List<Map<String,String>>>>() {
             public Map<String,List<Map<String,String>>> execute(ConfigService configService, AppManagement appManagement, Session session) throws JMException, ConnectorException {
                 // workspaceId = session.toString() as explained in the Javadoc of SessionAction
@@ -341,7 +338,7 @@ public class CellConfiguration implements Config, ConfigQueryExecutor {
         discardSession(false);
     }
 
-    public <T extends Serializable> T query(ConfigQuery<T> query) throws JMException, ConnectorException, InterruptedException, ConfigQueryException {
+    public <T extends Serializable> T query(ConfigQuery<T> query) throws JMException, IOException, InterruptedException, ConfigQueryException {
         return query.execute(this);
     }
     

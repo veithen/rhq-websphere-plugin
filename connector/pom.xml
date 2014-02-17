@@ -45,11 +45,6 @@
             <version>${project.version}</version>
             <optional>true</optional>
         </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>websphere-apis</artifactId>
-            <version>${project.version}</version>
-        </dependency>
         <dependency> 
             <groupId>jboss.jboss-embeddable-ejb3</groupId> 
             <artifactId>hibernate-all</artifactId> 
@@ -73,6 +68,16 @@
         <dependency>
         	<groupId>org.slf4j</groupId>
         	<artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.veithen.visualwas</groupId>
+            <artifactId>connector</artifactId>
+            <version>1.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.veithen.visualwas</groupId>
+            <artifactId>clientlib</artifactId>
+            <version>1.0.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
     <build>

@@ -22,11 +22,10 @@
  */
 package be.fgov.kszbcss.rhq.websphere.config;
 
+import java.io.IOException;
 import java.util.Collection;
 
 import javax.management.JMException;
-
-import com.ibm.websphere.management.exception.ConnectorException;
 
 final class RelativePath<T extends ConfigObject> extends Path<T> {
     private final Path<?> parent;
@@ -45,7 +44,7 @@ final class RelativePath<T extends ConfigObject> extends Path<T> {
     }
 
     @Override
-    <S extends ConfigObject> Collection<S> resolveRelative(String relativePath, Class<S> type) throws JMException, ConnectorException, InterruptedException {
+    <S extends ConfigObject> Collection<S> resolveRelative(String relativePath, Class<S> type) throws JMException, IOException, InterruptedException {
         if (relativePath == null) {
             return parent.resolveRelative(path, type);
         } else {

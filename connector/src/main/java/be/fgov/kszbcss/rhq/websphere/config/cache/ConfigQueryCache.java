@@ -40,14 +40,13 @@ import javax.management.JMException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.github.veithen.visualwas.client.repository.ConfigEpoch;
+
 import be.fgov.kszbcss.rhq.websphere.config.CacheRefreshStrategy;
 import be.fgov.kszbcss.rhq.websphere.config.ConfigData;
 import be.fgov.kszbcss.rhq.websphere.config.ConfigQuery;
 import be.fgov.kszbcss.rhq.websphere.config.ConfigQueryException;
 import be.fgov.kszbcss.rhq.websphere.config.ConfigQueryExecutor;
-
-import com.ibm.websphere.management.exception.ConnectorException;
-import com.ibm.websphere.management.repository.ConfigEpoch;
 
 public class ConfigQueryCache implements Runnable {
     /**

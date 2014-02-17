@@ -22,6 +22,7 @@
  */
 package be.fgov.kszbcss.rhq.websphere.process;
 
+import java.io.IOException;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collections;
@@ -48,16 +49,15 @@ import be.fgov.kszbcss.rhq.websphere.mbean.MBeanClient;
 import be.fgov.kszbcss.rhq.websphere.mbean.MBeanClientFactory;
 import be.fgov.kszbcss.rhq.websphere.mbean.MBeanLocator;
 import be.fgov.kszbcss.rhq.websphere.process.locator.ProcessLocator;
-import be.fgov.kszbcss.rhq.websphere.proxy.Perf;
 import be.fgov.kszbcss.rhq.websphere.util.PIDChangeTracker;
 import be.fgov.kszbcss.rhq.websphere.util.PIDWatcher;
 
+import com.github.veithen.visualwas.client.pmi.Perf;
+import com.github.veithen.visualwas.client.pmi.PmiModuleConfig;
+import com.github.veithen.visualwas.client.pmi.StatDescriptor;
+import com.github.veithen.visualwas.client.pmi.Stats;
 import com.ibm.websphere.management.AdminClient;
 import com.ibm.websphere.management.exception.ConnectorException;
-import com.ibm.websphere.pmi.PmiModuleConfig;
-import com.ibm.websphere.pmi.stat.StatDescriptor;
-import com.ibm.websphere.pmi.stat.StatLevelSpec;
-import com.ibm.websphere.pmi.stat.WSStats;
 
 /**
  * Represents a WebSphere process (application server, node agent or deployment manager) and
@@ -123,9 +123,9 @@ public abstract class WebSphereServer {
      * without the possibility of getting a {@link ConnectorException}.
      * 
      * @return the cell name
-     * @throws ConnectorException
+     * @throws IOException
      */
-    public String getCell() throws ConnectorException {
+    public String getCell() throws IOException {
         return processIdentityValidator.getCell();
     }
 
@@ -134,9 +134,9 @@ public abstract class WebSphereServer {
      * without the possibility of getting a {@link ConnectorException}.
      * 
      * @return the node name
-     * @throws ConnectorException
+     * @throws IOException
      */
-    public String getNode() throws ConnectorException {
+    public String getNode() throws IOException {
         return processIdentityValidator.getNode();
     }
 
@@ -145,13 +145,13 @@ public abstract class WebSphereServer {
      * name without the possibility of getting a {@link ConnectorException}.
      * 
      * @return the server name
-     * @throws ConnectorException
+     * @throws IOException
      */
-    public String getServer() throws ConnectorException {
+    public String getServer() throws IOException {
         return processIdentityValidator.getServer();
     }
 
-    public String getProcessType() throws ConnectorException {
+    public String getProcessType() throws IOException {
         return processIdentityValidator.getProcessType();
     }
     
@@ -179,7 +179,7 @@ public abstract class WebSphereServer {
         return notificationListenerManager.addNotificationListener(name, listener, filter, handback, extended);
     }
     
-    public WSStats getWSStats(StatDescriptor descriptor) throws JMException, ConnectorException {
+    public Stats getWSStats(StatDescriptor descriptor) throws JMException, ConnectorException {
         WSStats stats = perf.getStatsArray(new StatDescriptor[] { descriptor }, Boolean.TRUE)[0];
         if (log.isDebugEnabled()) {
             if (stats == null) {
@@ -194,7 +194,7 @@ public abstract class WebSphereServer {
         return stats;
     }
     
-    public synchronized PmiModuleConfig getPmiModuleConfig(WSStats stats) throws JMException, ConnectorException {
+    public synchronized PmiModuleConfig getPmiModuleConfig(Stats stats) throws JMException, ConnectorException {
         String statsType = stats.getStatsType();
         int dashIndex = statsType.indexOf('#');
         if (dashIndex != -1) {

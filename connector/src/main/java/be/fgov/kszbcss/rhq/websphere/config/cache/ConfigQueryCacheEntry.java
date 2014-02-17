@@ -25,10 +25,10 @@ package be.fgov.kszbcss.rhq.websphere.config.cache;
 import java.io.Serializable;
 import java.util.Set;
 
+import com.github.veithen.visualwas.client.repository.ConfigEpoch;
+
 import be.fgov.kszbcss.rhq.websphere.config.ConfigQuery;
 import be.fgov.kszbcss.rhq.websphere.config.ConfigQueryException;
-
-import com.ibm.websphere.management.repository.ConfigEpoch;
 
 final class ConfigQueryCacheEntry<T extends Serializable> implements Serializable {
     private static final long serialVersionUID = 1L;
